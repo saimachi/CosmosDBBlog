@@ -6,7 +6,7 @@
 
     - IoT Edge module
     - IoT Hub
-    - Azure Function App
+    - Stream Analytics
     - Cosmos DB warm path storage
 
 2. Explanation of how readers can replicate the sample project (likely just a link to a page in this repository)
@@ -22,3 +22,6 @@
     - Calculation of RU/s from this IoT solution
 
 2. Overview of Cosmos DB partitions and the importance of choosing a partition key well
+
+## Optional: Using Power BI to visualize data from Cosmos DB
+
