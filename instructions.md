@@ -106,5 +106,9 @@ Azure Stream Analytics will ingest data from the Azure IoT Hub instance you crea
 
     ![](media/iothub-input-stream-analytics.png)
 
+4. When Cosmos DB is provisioned, *machineId* will be used as the partition key, to simulate a factory environment in which multiple IoT devices send data to the IoT Edge module. However, in its current configuration, there is no *machineId* field in the JSON documents that are being sent. So, under **Job topology**, select **Functions**. Select **+ Add** and **Javascript UDF**. Then, insert the following code:
 
+```js
+
+```
 
