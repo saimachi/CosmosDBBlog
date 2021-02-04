@@ -62,9 +62,11 @@ In this section, an IoT Hub and a Linux VM running a Simulated Temperature Senso
 
     ![](media/accessing-iotedge-device-in-portal.png)
 
-8. Select **Set modules**. Then, select **+ Add** under **IoT Edge Modules**. Select **Marketplace Module**. Search for **Simulated Temperature Sensor**. The image below demonstrates the end result of this process. 
+8. Select **Set modules**. Then, select **+ Add** under **IoT Edge Modules**. Select **IoT Edge Module**. Enter `SimulatedTemperatureSensor` as the **IoT Edge Module Name**. Set `mcr.microsoft.com/azureiotedge-simulated-temperature-sensor:1.0` as the **Image URI**.
 
-    ![](media/set-marketplace-module.png)
+    >**Note**: You may recognize that this is an existing Azure Marketplace module. However, the Marketplace module does not allow us to set the `MessageCount` environment variable, so we are provisioning it manually.
+
+9. Navigate to the **Environment Variables** tab. Add an environment variable called `MessageCount`, and set its value to `-1`. Select **Add**.
 
 9. Select **Next: Routes >**. The first route, **route**, moves messages from all modules on the device to **$upstream**, the IoT Hub. The second route, **SimulatedTemperatureSensorToIoTHub**, only routes messages from the **SimulatedTemperatureSensor** module. Feel free to delete **route**. Then, select **Review + create** and **Create**.
 
@@ -106,9 +108,56 @@ Azure Stream Analytics will ingest data from the Azure IoT Hub instance you crea
 
     ![](media/iothub-input-stream-analytics.png)
 
-4. When Cosmos DB is provisioned, *machineId* will be used as the partition key, to simulate a factory environment in which multiple IoT devices send data to the IoT Edge module. However, in its current configuration, there is no *machineId* field in the JSON documents that are being sent. So, under **Job topology**, select **Functions**. Select **+ Add** and **Javascript UDF**. Then, insert the following code:
+4. When Cosmos DB is provisioned, *machineId* will be used as the partition key, to simulate a factory environment in which multiple IoT devices (attached to multiple machines) send data to the IoT Edge module. However, in its current configuration, there is no *machineId* field in the JSON documents that are being sent. So, under **Job topology**, select **Functions**. Select **+ Add** and **Javascript UDF**. Then, insert the following code:
 
-```js
+    ```js
+    function main(arg1) {
+        return Math.floor(Math.random() * 10);
+    }
+    ```
 
-```
+    >**Note**: You may notice that `arg1` is not used in the UDF. However, at least one parameter must be present for the UDF to save.
 
+5. Save the UDF with the **Function alias** `getMachineId` and the **Output type** `bigint`.
+
+    ![](./media/javascript-udf.png)
+
+## Provision Azure Cosmos DB
+
+You will provision an Azure Cosmos DB account, database, and container in Azure portal.
+
+### Creating a Cosmos DB Account
+
+1. Select **+ Create a resource** in the portal. Search for **Azure Cosmos DB**. Select **Create**.
+
+2. On the **Create Azure Cosmos DB Account** window, provide the following information. Then, select **Review + create**.
+
+    | Name        | Value       |
+    | ----------- | ----------- |
+    | Subscription      | Same Azure subscription you've been using throughout the lab.       |
+    | Resource Group   | Same resource group where you've housed the other lab resources.        |
+    | Account Name   | `cosmosdb-account-[SUFFIX]`        |
+    | API   | `Core (SQL)`       |
+    | Notebooks (Preview)   | `Off`       |
+    | Location   | Same location where your other resources are housed.       |
+    | Capacity mode   | `Provisioned throughput`       |
+    | Apply Free Tier Discount   | Your choice.       |
+    | Account Type   | `Non-Production`      |
+    | Geo-Redundancy  | `Disable`     |
+    | Multi-region Writes  | `Disable`      |
+
+    >**Note**: In a production deployment, there are certainly features you would want to enable, like **Geo-Redundancy**. We are not enabling them for the sake of cost. You can find more information about these options [here.](https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal)
+
+### Creating a Database and a Container
+
+1. Once your Cosmos DB account provisions, navigate to the resource. Then, select **Data Explorer**. 
+
+2. Select **New Database**.
+
+3. Set the **Database id** to `IoTTelemetry`. Make sure to uncheck **Provision throughput**; we will provision throughput at the container-level. Select **OK**.
+
+4. In **Data Explorer**, select the three dots next to the `IoTTelemetry` database, and select **New Container**. Set the **Container id** to `MachineTemperatureData` and **Partition key** to `/machineId`. Ensure that **Throughput** is set to `400 RU/s`. Select **OK**.
+
+    ![](./media/cosmosdb-info.png)
+
+    >**Note**: Microsoft recommends that you provision *unlimited* containers, which have no storage limits, for streaming data. Provisioning an unlimited container would require the container to have a throughput of at least 1,000 RU/s. We are not enabling that feature for the sake of cost.
