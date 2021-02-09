@@ -161,3 +161,66 @@ You will provision an Azure Cosmos DB account, database, and container in Azure 
     ![](./media/cosmosdb-info.png)
 
     >**Note**: Microsoft recommends that you provision *unlimited* containers, which have no storage limits, for streaming data. Provisioning an unlimited container would require the container to have a throughput of at least 1,000 RU/s. We are not enabling that feature for the sake of cost.
+
+5. Create another container in the same database called `TemperatureEvents`. The **Partition key** is again `/machineId`, and ensure that the **Throughput** is `400 RU/s`.
+
+### Configure an Output for Stream Analytics
+
+1. Navigate to your Stream Analytics job, and under **Job topology**, select **Outputs**. 
+
+2. **+ Add** an output, and select **Cosmos DB**.
+
+3. Enter `TemperatureData` as the **Output alias**, and select the Cosmos DB account you created for this lab. Select the `IoTTelemetry` database and `MachineTemperatureData` as the **Container name**. Then, select **Save**.
+
+    ![](./media/temperaturedata-cosmosdb-output.png)
+
+4. Repeat steps 2-3, but use `EventData` as the **Output alias** and `TemperatureEvents` as the **Container name**. Select **Save**.
+
+## Starting the Stream Analytics Job
+
+1. Navigate to **Query** under **Job topology**. 
+
+2. Enter the following query. Ensure that there are no errors in the code editor.
+
+    ```sql
+    WITH 
+    DeviceDataWithMachineId AS 
+    (
+        SELECT
+            machine,
+            ambient,
+            timeCreated,
+            EventProcessedUtcTime,
+            PartitionId,
+            EventEnqueuedUtcTime,
+            IoTHub,
+            UDF.getMachineId(0) AS machineId
+        FROM
+            EnvironmentMonitoringDevice TIMESTAMP BY timeCreated
+    )
+
+    SELECT * INTO TemperatureData FROM DeviceDataWithMachineId
+
+    SELECT 
+        machineId,
+        System.Timestamp() AS EventLoggedTime,
+        AVG(machine.temperature) AS [TimeWindowTemp]
+    INTO 
+        EventData
+    FROM 
+        DeviceDataWithMachineId
+    GROUP BY 
+        machineId, TumblingWindow(minute, 3)
+    HAVING
+        [TimeWindowTemp] > 103.5
+    ```
+
+3. Select **Save query**. Then, navigate to the **Overview** tab and select **Start**. Select **Start** again.
+
+    ![](./media/start-stream-analytics-job.png)
+
+4. Navigate to Azure Cosmos DB, and select **Data Explorer**. Select the **TemperatureEvents** container and then select **Items**. You should see some events logged (you may need to refresh).
+
+    ![](./media/viewing-logged-events.png)
+
+    >**Note**: If you do not see any output, please adjust the aggregation window time (currently set to 3 minutes) and the value in the HAVING clause. You can also use the **Test query** tool of the Query editor to visualize results.
