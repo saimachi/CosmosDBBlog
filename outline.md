@@ -27,8 +27,9 @@
 
 1. Quick overview of the `TemperatureEvents` container
 
-2. Explanation of how an Azure Function App uses change feed notifications to write to Azure SignalR
+2. Explanation of how an Azure Function App uses change feed notifications to write to Azure SignalR (not part of the solution though)
 
-3. Demo app that shows notifications
-    - If an event is logged to the `TemperatureEvents` container, the time shown in the app will be updated and the current temperature shown on the app will be updated
-    - [Similar example based on Cosmos DB, but not involving IoT](https://anthonychu.ca/post/cosmosdb-real-time-azure-functions-signalr-service/)
+3. Azure Synapse Analytics
+
+    - HTAP explained
+    - Query Comos DB OLTP/OLAP

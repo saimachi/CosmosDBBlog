@@ -224,3 +224,6 @@ You will provision an Azure Cosmos DB account, database, and container in Azure 
     ![](./media/viewing-logged-events.png)
 
     >**Note**: If you do not see any output, please adjust the aggregation window time (currently set to 3 minutes) and the value in the HAVING clause. You can also use the **Test query** tool of the Query editor to visualize results.
+
+## Creating Azure Synapse Link
+
