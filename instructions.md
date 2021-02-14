@@ -1,4 +1,4 @@
-# Cosmos DB for IoT Instructions
+# Cosmos DB HTAP for IoT Instructions
 
 This document accompanies the [post]() written about deploying Cosmos DB for an IoT solution.
 
@@ -146,7 +146,7 @@ You will provision an Azure Cosmos DB account, database, and container in Azure 
     | Geo-Redundancy  | `Disable`     |
     | Multi-region Writes  | `Disable`      |
 
-    >**Note**: In a production deployment, there are certainly features you would want to enable, like **Geo-Redundancy**. We are not enabling them for the sake of cost. You can find more information about these options [here.](https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal)
+    >**Note**: In a production deployment, there are certainly features you would want to enable, like **Geo-Redundancy**. We are not enabling them for the sake of simplicity. You can find more information about these options [here.](https://docs.microsoft.com/en-us/azure/cosmos-db/create-cosmosdb-resources-portal)
 
 ### Creating a Database and a Container
 
@@ -309,4 +309,4 @@ To enable Azure Synapse Link, you will need to first provision an Azure Synapse 
 
 8. Skip to the **Confirm import settings** page, and select **Import**. Wait for the process to complete.
 
-### Point Stream Analytics to the New Container
+At this point, you have completed the setup needed for the lab. Navigate to the post to continue your exploration.
