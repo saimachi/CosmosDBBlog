@@ -227,3 +227,86 @@ You will provision an Azure Cosmos DB account, database, and container in Azure 
 
 ## Creating Azure Synapse Link
 
+To enable Azure Synapse Link, you will need to first provision an Azure Synapse workspace with an Apache Spark pool. Then, you can migrate data from the `MachineTemperatureData` container to a new container with Analytical Store enabled.
+
+### Provisioning Azure Synapse Analytics
+
+1. In the portal, select **+ Create a resource** and search for **Azure Synapse Analytics**. Then, select **Create**.
+
+2. Populate the **Create Synapse Workspace** form with the following information. Also verify that your Azure account is given the **Storage Blob Data Contributor** role for your ADLS Gen2 account.
+
+    | Name        | Value       |
+    | ----------- | ----------- |
+    | Subscription      | Same Azure subscription you've been using throughout the lab.       |
+    | Resource Group   | Same resource group where you've housed the other lab resources.        |
+    | Managed Resource Group   | Leave it blank.        |
+    | Workspace name   | `cosmosdb-synapse-[SUFFIX]`        |
+    | Region   | Same location where your other resources are housed.       |
+    | ADLS Account name   | Select **Create new** and enter `cosmosdbiotadls[SUFFIX]`       |
+    | File system name   | Select **Create new** and enter `synapsefs`        |
+
+3. Select **Review + create**. Once validation passes, select **Create**.
+
+### Provisioning Apache Spark Pools
+
+1. Navigate to your resource group and select your Synapse workspace. On the **Overview** tab, select the **Workspace web URL**.
+
+2. Navigate to the **Manage** hub and select **Apache Spark pools**. Then, select **+ New**.
+
+    ![](./media/select-manage-hub.png)
+
+3. On the **Create Apache Spark pool** page, provide the following information. Then, select **Review + create** and **Create**.
+
+    | Name        | Value       |
+    | ----------- | ----------- |
+    | Apache Spark pool name     | `cosmosdbspark`       |
+    | Node size   | `Small (4 vCores / 32 GB)`        |
+    | Autoscale   | `Disabled`        |
+    | Number of nodes   | `3` (the minimum)       |
+
+### Creating a Linked Service for Cosmos DB
+
+1. Under **External connections** (still in the Manage hub), select **Linked services**. Select **+ New** and **Azure Cosmos DB (SQL API)**. 
+
+2. On the **New linked service** window, provide the following values. Then, select **Test connection** at the lower right hand corner of the page. Then, select **Create**.
+
+    | Name        | Value       |
+    | ----------- | ----------- |
+    | Name     | `cosmosdblinked`       |
+    | Azure subscription   | Your Azure subscription        |
+    | Azure Cosmos DB account name   | `cosmosdb-account-[SUFFIX]`        |
+    | Database name   | `IoTTelemetry`       |
+
+### Creating a new Cosmos DB Container with Analytical Store Enabled
+
+1. Navigate to your Cosmos DB resource, and select **Data Explorer**. At the upper left-hand corner of the page, select the Synapse logo, and wait for Azure Synapse Link to be enabled.
+
+2. Create a new container and specify the following information. Then, select **OK**.
+
+    | Name        | Value       |
+    | ----------- | ----------- |
+    | Database id     | `IoTTelemetry`       |
+    | Container id   | `MachineTemperatureDataAnalyticalStore`        |
+    | Partition key   | `/machineId`        |
+    | Throughput   | Manual / `400 RU/s`       |
+    | Analytical store   | `On`       |
+
+3. Download the [DocumentDB Migration Tool.](https://www.microsoft.com/en-us/download/details.aspx?id=46436)
+
+4. Extract the zip file to a folder of your choosing (I chose `C:\Cosmos DB Migration Tool`). 
+
+5. Navigate to that folder and launch `dtui.exe`. 
+
+    ![](./media/launch-migration-tool.png)
+
+6. Navigate to Cosmos DB. Select **Keys**, and copy the value of **Primary Connection String**. Then, in the **Specify source information** page of the DocumentDB Migration Tool, select **DocumentDB** as the source. Paste your connection string, making sure to append `Database=IoTTelemetry;` to the end of the value. Set `MachineTemperatureData` as the collection. Select **Next**.
+
+    ![](./media/source-info.png)
+
+7. On the **Specify target information** page, ensure that you export to **Document DB - Sequential record import**. Specify the same connection string (with the database). Set the collection as `MachineTemperatureDataAnalyticalStore`. Set `/machineId` as the **Partition key**. Select **Next** again.
+
+    ![](./media/target-info-db-migration.png)
+
+8. Skip to the **Confirm import settings** page, and select **Import**. Wait for the process to complete.
+
+### Point Stream Analytics to the New Container
