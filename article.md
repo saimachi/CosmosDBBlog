@@ -111,6 +111,10 @@ Execute the query. Note that the serverless SQL Pool, available in all Synapse w
 
 ## Conclusion
 
-In this blog post, you learned how to build an IoT solution that leverages Azure IoT Hub, Stream Analytics, Cosmos DB, and Synapse Analyics. This solution does not only provide temperature alerts (`TemperatureEvents` Cosmos DB container), but also make IoT device data available for consumption in Apache Spark and the serverless SQL pool in the Synapse Analytics Workspace.
+In this blog post, you learned how to build an IoT solution that leverages Azure IoT Hub, Stream Analytics, Cosmos DB, and Synapse Analyics. This solution does not only provide temperature alerts (`TemperatureEvents` Cosmos DB container), but also makes IoT device data available for consumption in Apache Spark and the serverless SQL pool in the Synapse Analytics Workspace.
+
+## Want to Learn More?
 
 There are certainly other avenues to take with this sample application. First, you can create a Power BI dashboard to visualize the device data. You can learn more about this approach [here.](https://docs.microsoft.com/en-us/azure/synapse-analytics/spark/apache-spark-to-power-bi#connect-to-power-bi) In addition, I demonstrated an example of querying the Cosmos DB Analytical Store using Azure Synapse Analytics. However, you can also use Spark structured streaming, which leverages Cosmos DB change feed notifications. Note that this operation does not use the Analytical Store and thus costs Cosmos DB throughput. 
+
+In addition, the Solliance Partner Network places intelligent analytics at the forefront of its solutions and community engagement. Twice a year, its partners present in the [Microsoft Azure AI conference.](https://www.azureaiconf.com/#!/next) In addition, the [Solliance blog](https://solliance.net/blog) hosts many resources for Azure developers, including [this blog written by Daron about using text analytics with large inputs](https://solliance.net/blog/analyzing-large-documents-with-azure-text-analytics) and [this blog written by Siri about the fundamental component of any analytics solution - a database.](https://solliance.net/blog/migrating-on-premises-database-to-cloud) Remember to check the blog for more.
